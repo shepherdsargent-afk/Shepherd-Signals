@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShepherdSignals</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0b0d14;--s2:#12151f;--s3:#1a1e2e;--s4:#222738;
+  --go:#c9a84c;--go2:#e2c06a;--gd:rgba(201,168,76,.1);--gb:rgba(201,168,76,.22);--gg:rgba(201,168,76,.06);
+  --w:#f5f3ee;--mid:#9098b4;--dim:#565d7a;--line:rgba(255,255,255,.08);--lb:rgba(201,168,76,.15);
+  --re:#e05a5a;--rd:rgba(224,90,90,.1);--rb:rgba(224,90,90,.2);
+  --am:#d4944a;--ad:rgba(212,148,74,.1);--ab:rgba(212,148,74,.2);
+  --bl:#6b91c9;--bd:rgba(107,145,201,.1);--bb:rgba(107,145,201,.2);
+  --gn:#5aac8e;--gnd:rgba(90,172,142,.1);--gnb:rgba(90,172,142,.2);
+  --pu:#9b8ec4;--pud:rgba(155,142,196,.1);--pub:rgba(155,142,196,.2);
+  --f:'DM Sans',sans-serif;--m:'DM Mono',monospace;--se:'Playfair Display',serif;
+  --e:cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{background:var(--ink);color:var(--w);font-family:var(--f);font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:200;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:rgba(11,13,20,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px}
+.lname{font-size:12px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--w)}
+.nbadge{font-family:var(--m);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--go);background:var(--gd);border:1px solid var(--gb);padding:3px 10px;border-radius:100px;display:flex;align-items:center;gap:5px}
+.ndot{width:5px;height:5px;background:var(--go);border-radius:50%;animation:bl 2s ease-in-out infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+.app{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+.stepper{display:flex;background:var(--s2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:2px;margin-bottom:32px}
+.step{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 6px;border-radius:8px;cursor:pointer;transition:background .18s var(--e);border:1px solid transparent}
+.step.active{background:var(--s4);border-color:var(--lb)}
+.sn{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--dim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--dim);flex-shrink:0;transition:all .18s;font-family:var(--m)}
+.step.active .sn{border-color:var(--go);color:var(--go);background:var(--gd)}
+.step.done .sn{border-color:var(--go);background:var(--go);color:var(--ink)}
+.sl{font-size:12px;font-weight:500;color:var(--dim);transition:color .18s}.step.active .sl{color:var(--w)}
+.panel{display:none}.panel.show{display:block;animation:up .28s var(--e)}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:24px}
+.ph h2{font-family:var(--se);font-size:26px;font-weight:600;letter-spacing:-.3px;color:var(--w);margin-bottom:5px;line-height:1.2}
+.ph h2 em{color:var(--go);font-style:italic}
+.ph p{font-size:14px;color:var(--mid);line-height:1.65;max-width:560px}
+.card{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:10px}
+.card:hover{border-color:rgba(255,255,255,.11)}
+.cl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--go);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.cl::before{content:'';width:3px;height:10px;background:var(--go);border-radius:2px;display:block}
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.cc{background:var(--s3);border:1.5px dashed var(--line);border-radius:12px;padding:14px;transition:all .2s var(--e)}
+.cc:hover{border-color:var(--gb);background:var(--gg)}.cc.done{border-style:solid;border-color:var(--gb);background:var(--gg)}
+.cc.opt{border-color:rgba(107,145,201,.18)}.cc.opt.done{border-color:var(--bb);background:var(--bd)}
+.cico{font-size:20px;margin-bottom:6px}.ctit{font-size:12px;font-weight:600;color:var(--w);margin-bottom:2px}
+.csub{font-size:10.5px;color:var(--dim);line-height:1.4;margin-bottom:6px}
+.cbadge{display:inline-flex;font-size:9px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:1px 7px;border-radius:100px;font-family:var(--m)}
+.br{background:var(--gd);color:var(--go);border:1px solid var(--gb)}.bo{background:var(--bd);color:var(--bl);border:1px solid var(--bb)}
+.cstat{font-size:11px;font-family:var(--m);margin-top:5px;font-weight:500}
+.cfl{border-top:1px solid var(--line);padding:5px 0 0;margin-top:6px}
+.cfr{display:flex;align-items:center;justify-content:space-between;font-size:11px;padding:2px 0}
+.cfr span{font-family:var(--m);color:var(--mid)}.cfr button{background:none;border:none;color:var(--re);cursor:pointer;font-size:10px;font-weight:500;padding:1px 4px;border-radius:2px}.cfr button:hover{background:var(--rd)}
+.al{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;cursor:pointer;padding:5px 9px;border-radius:4px;transition:all .15s;margin-top:6px}.al input{display:none}
+.ag{color:var(--go);background:var(--gd);border:1px solid var(--gb)}.ag:hover{background:rgba(201,168,76,.18)}
+.ab{color:var(--bl);background:var(--bd);border:1px solid var(--bb)}.ab:hover{background:rgba(107,145,201,.18)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--dim)}
+.fg input,.fg select{background:var(--s3);border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--w);font-family:var(--m);font-size:13px;width:100%;transition:border-color .15s;outline:none}
+.fg input:focus,.fg select:focus{border-color:var(--gb)}.fg input::placeholder{color:var(--dim)}
+select option{background:var(--s3)}
+.brow{display:flex;gap:8px;align-items:center;margin-top:22px}
+.bp{background:var(--go);color:var(--ink);border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;font-family:var(--f);cursor:pointer;transition:all .18s var(--e)}
+.bp:hover{background:var(--go2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(201,168,76,.3)}
+.bs{background:transparent;color:var(--mid);border:1px solid var(--line);padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;font-family:var(--f);cursor:pointer;transition:all .15s}.bs:hover{border-color:var(--lb);color:var(--w)}
+.bsm{background:transparent;border:1px solid var(--line);color:var(--mid);padding:6px 12px;border-radius:4px;font-size:12px;font-weight:500;font-family:var(--f);cursor:pointer;transition:all .15s}.bsm:hover{border-color:var(--lb);color:var(--w)}
+.er{background:var(--rd);border:1px solid var(--rb);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--re);font-family:var(--m);margin-top:10px;display:none}.er.show{display:block}
+.an{font-size:11px;color:var(--dim);line-height:1.7;margin-top:10px;padding:10px 12px;background:var(--s3);border-radius:8px;border-left:2px solid var(--go);font-family:var(--m)}
+.loading{display:none;padding:60px 20px;text-align:center}.loading.show{display:block}
+.sw{width:48px;height:48px;position:relative;margin:0 auto 24px}
+.sp{position:absolute;inset:0;border:1.5px solid var(--line);border-top-color:var(--go);border-radius:50%;animation:spin .9s linear infinite}
+.sp2{position:absolute;inset:8px;border:1px solid transparent;border-top-color:rgba(201,168,76,.3);border-radius:50%;animation:spin 1.4s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lt{font-family:var(--se);font-size:22px;color:var(--w);margin-bottom:5px}
+.ls2{font-size:13px;color:var(--mid);margin-bottom:24px}
+.lss{display:flex;flex-direction:column;gap:3px;max-width:320px;margin:0 auto}
+.lsi{display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:7px;font-size:12px;font-family:var(--m);color:var(--dim);transition:all .2s}
+.lsi.cur{color:var(--go);background:var(--gd)}.lsi.fin{color:var(--mid)}
+.ld{width:4px;height:4px;border-radius:50%;background:var(--dim);flex-shrink:0;transition:background .2s}
+.lsi.cur .ld{background:var(--go);animation:bl 1s ease-in-out infinite}.lsi.fin .ld{background:var(--go)}
+.report{display:none}.report.show{display:block;animation:up .35s var(--e)}
+.dt{display:inline-flex;align-items:center;font-size:10px;font-weight:500;padding:1px 7px;border-radius:100px;margin-left:5px;vertical-align:middle;letter-spacing:.2px;font-family:var(--m)}
+.dtf{background:var(--gd);color:var(--go);border:1px solid var(--gb)}
+.dte{background:var(--ad);color:var(--am);border:1px solid var(--ab)}
+.dtp{background:var(--bd);color:var(--bl);border:1px solid var(--bb)}
+.leg{display:flex;gap:12px;align-items:center;padding:9px 12px;background:var(--s2);border:1px solid var(--line);border-radius:8px;margin-bottom:18px;flex-wrap:wrap}
+.legt{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--dim)}
+.legi{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim)}
+.ract{display:flex;gap:8px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.rdt{font-size:11px;color:var(--dim);font-family:var(--m);margin-left:auto}
+.hero{background:var(--s2);border:1px solid var(--line);border-radius:20px;padding:38px;text-align:center;margin-bottom:10px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:500px;height:160px;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.07),transparent 65%);pointer-events:none}
+.ptag{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;font-family:var(--m)}
+.pnum{font-family:var(--se);font-size:68px;font-weight:700;color:var(--go);letter-spacing:-2px;line-height:1;margin-bottom:5px}
+.psub{font-size:14px;color:var(--mid);margin-bottom:22px}
+.pst{display:inline-flex;align-items:center;gap:20px;background:var(--s3);border:1px solid var(--line);border-radius:14px;padding:12px 24px}
+.psl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);margin-bottom:3px;font-weight:500}
+.psv{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.pdv{width:1px;height:26px;background:var(--line)}
+.ccg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.ccs{background:var(--s2);border:1px solid var(--line);border-radius:12px;padding:14px;position:relative;overflow:hidden;transition:border-color .15s}
+.ccs:hover{border-color:rgba(255,255,255,.11)}
+.ccs::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.ccs.food::before{background:var(--go)}.ccs.labour::before{background:var(--bl)}.ccs.utilities::before{background:var(--gn)}.ccs.vendors::before{background:var(--am)}.ccs.maintenance::before{background:var(--re)}.ccs.other::before{background:var(--pu)}
+.ccsi{font-size:18px;margin-bottom:5px}.ccsc{font-size:9px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);margin-bottom:3px;font-family:var(--m)}
+.ccss{font-size:19px;font-weight:700;letter-spacing:-.3px}.ccsd{font-size:11px;font-family:var(--m);margin-top:2px}.ccsr{font-size:11px;font-family:var(--m);margin-top:1px}
+.slbl{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.slbl::before{content:'';display:block;width:3px;height:10px;background:var(--go);border-radius:2px}
+.narr{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:18px;font-size:13px;line-height:1.85;color:var(--mid);white-space:pre-wrap;font-family:var(--m);margin-bottom:10px}
+.tw{background:var(--s2);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:10px}
+.rt{width:100%;border-collapse:collapse}
+.rt th{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:9px 13px;text-align:left;border-bottom:1px solid var(--line);background:var(--s3)}
+.rt td{padding:10px 13px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--m);vertical-align:middle}
+.rt tr:last-child td{border-bottom:none}.rt tr:hover td{background:rgba(255,255,255,.02)}
+.inm{font-family:var(--f);font-weight:600;font-size:13px;color:var(--w)}
+.ica{font-size:11px;color:var(--dim);margin-top:1px;font-family:var(--f)}
+.pill{display:inline-flex;font-size:10px;font-weight:500;padding:2px 8px;border-radius:100px;letter-spacing:.2px;font-family:var(--m)}
+.pr{background:var(--rd);color:var(--re);border:1px solid var(--rb)}.pa{background:var(--ad);color:var(--am);border:1px solid var(--ab)}.pg{background:var(--gd);color:var(--go);border:1px solid var(--gb)}.pb{background:var(--bd);color:var(--bl);border:1px solid var(--bb)}.pgn{background:var(--gnd);color:var(--gn);border:1px solid var(--gnb)}
+.tlw{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:10px}
+.tli{margin-bottom:14px}.tli:last-child{margin-bottom:0}
+.tlh{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.tlbar{height:5px;background:var(--s4);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.tlf{height:100%;border-radius:3px;transition:width 1s var(--e)}
+.tldts{display:flex;justify-content:space-between}
+.tldt{font-size:9px;color:var(--dim);font-family:var(--m)}
+.sol{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:10px}
+.sol-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.sol-v{font-size:15px;font-weight:700;color:var(--w);letter-spacing:-.2px}
+.sol-c{font-size:11px;color:var(--dim);font-family:var(--m);margin-top:1px}
+.sol-s{font-size:13px;font-weight:700;color:var(--go);font-family:var(--m)}
+.alt{background:var(--s3);border:1px solid var(--line);border-radius:8px;padding:11px;margin-bottom:6px}.alt:last-child{margin-bottom:0}
+.alt-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.alt-n{font-size:13px;font-weight:600;color:var(--w)}
+.alt-s{font-size:12px;font-weight:600;font-family:var(--m);color:var(--go)}
+.alt-d{font-size:11px;color:var(--mid);line-height:1.5}
+.alt-a{font-size:11px;color:var(--bl);font-family:var(--m);margin-top:4px;padding:4px 8px;background:var(--bd);border-radius:4px;display:inline-block}
+.tcol{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.banner{background:var(--s2);border:1px solid var(--gb);border-radius:20px;padding:38px;text-align:center;margin-top:10px;position:relative;overflow:hidden}
+.banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(201,168,76,.06),transparent 55%);pointer-events:none}
+.banlbl{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;font-family:var(--m)}
+.banamt{font-family:var(--se);font-size:56px;font-weight:700;color:var(--go);letter-spacing:-1px;line-height:1;margin-bottom:5px}
+.bansub{font-size:14px;color:var(--mid)}
+.cw{position:fixed;bottom:20px;right:20px;z-index:999;display:none}
+.ctg{width:48px;height:48px;background:linear-gradient(135deg,var(--go),var(--go2));border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(201,168,76,.4);transition:all .18s var(--e)}.ctg:hover{transform:scale(1.08)}
+.cpul{position:absolute;top:-2px;right:-2px;width:11px;height:11px;background:var(--re);border-radius:50%;border:2px solid var(--ink);animation:bl 2s ease-in-out infinite}
+.cwn{position:fixed;bottom:76px;right:20px;width:330px;height:450px;background:var(--s2);border:1px solid var(--line);border-radius:20px;display:none;flex-direction:column;z-index:999;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.cwn.open{display:flex;animation:up .22s var(--e)}
+.chd{padding:13px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ci{display:flex;align-items:center;gap:8px}
+.cav{width:26px;height:26px;background:var(--gd);border:1px solid var(--gb);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.cnm{font-size:13px;font-weight:600}.cst{font-size:11px;color:var(--go);font-family:var(--m)}
+.cx{background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px;padding:2px 5px;border-radius:3px;transition:all .15s;line-height:1}.cx:hover{background:rgba(255,255,255,.06);color:var(--w)}
+.cms{flex:1;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:7px}
+.cms::-webkit-scrollbar{width:3px}.cms::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+.msg{max-width:88%;padding:8px 11px;border-radius:11px;font-size:12px;line-height:1.55}
+.msg.ai{background:var(--s3);border:1px solid var(--line);color:var(--mid);align-self:flex-start;border-bottom-left-radius:3px}
+.msg.usr{background:linear-gradient(135deg,var(--go),var(--go2));color:var(--ink);align-self:flex-end;font-weight:500;border-bottom-right-radius:3px}
+.typ{display:flex;gap:3px;align-items:center;padding:2px 0}
+.typ span{width:4px;height:4px;background:var(--dim);border-radius:50%;animation:tp 1.2s ease-in-out infinite}
+.typ span:nth-child(2){animation-delay:.2s}.typ span:nth-child(3){animation-delay:.4s}
+@keyframes tp{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-3px);opacity:1}}
+.csg{padding:0 11px 5px;display:flex;flex-wrap:wrap;gap:3px;flex-shrink:0}
+.csug{background:var(--s3);border:1px solid var(--line);border-radius:100px;padding:3px 9px;font-size:11px;color:var(--mid);cursor:pointer;transition:all .15s;white-space:nowrap}.csug:hover{border-color:var(--gb);color:var(--go)}
+.cir{padding:9px 11px;border-top:1px solid var(--line);display:flex;gap:5px;flex-shrink:0}
+.cin{flex:1;background:var(--s3);border:1px solid var(--line);border-radius:7px;padding:7px 10px;color:var(--w);font-family:var(--f);font-size:12px;outline:none;transition:border-color .15s}.cin:focus{border-color:var(--gb)}.cin::placeholder{color:var(--dim)}
+.csnd{background:linear-gradient(135deg,var(--go),var(--go2));border:none;border-radius:7px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.csnd:hover{transform:scale(1.06)}
+.phdr{display:none}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4;margin:14mm 16mm}
+  nav,.stepper,.ract,.leg,.brow,.er,.cw,#p1,#p2,#p3,.loading{display:none!important}
+  #p4{display:block!important}
+  .report,.report.show{display:block!important;animation:none!important}
+  .phdr{display:flex!important;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:2px solid #c9a84c;margin-bottom:16px}
+  .phdr-n{font-size:12pt;font-weight:700;color:#111;letter-spacing:2px;text-transform:uppercase}
+  .phdr-m{font-size:8pt;color:#666;font-family:'Courier New',monospace;text-align:right;line-height:1.6}
+  body{background:#fff!important;color:#111!important;font-family:'Helvetica Neue',Arial,sans-serif;font-size:10pt}
+  .app{padding:0!important;max-width:100%!important}
+  .hero,.banner,.ccs,.tw,.card,.narr,.tlw,.sol,.tcol .card{background:#f9f7f2!important;border:1px solid #e8e4da!important}
+  .hero::before,.banner::before{display:none!important}
+  .pnum,.banamt{color:#b8902e!important}
+  .pst{background:#f0ede6!important;border-color:#e8e4da!important}
+  .rt th{background:#f0ede6!important;color:#888!important;border-bottom:1px solid #e8e4da!important}
+  .rt td{border-bottom:1px solid #f0ede6!important;color:#444!important}
+  .inm{color:#111!important}.slbl::before,.cl::before{background:#b8902e!important}
+  .tw,.sol,.tli,.ccs{page-break-inside:avoid}
+}
+@media(max-width:768px){
+  .cg,.fg2,.ccg,.tcol{grid-template-columns:1fr}
+  .stepper{flex-wrap:wrap}.pnum{font-size:52px}.pst{flex-direction:column;gap:10px}.pdv{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="phdr" id="phdr">
+  <div style="display:flex;align-items:center;gap:8px">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect width="20" height="20" rx="5" fill="#c9a84c"/><path d="M4 14L7.5 8L10.5 12L14 5" stroke="#111" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16.5" cy="5" r="1.4" fill="#111"/></svg>
+    <span class="phdr-n">ShepherdSignals</span>
+  </div>
+  <div class="phdr-m" id="phdr-m">Expense Intelligence Report</div>
+</div>
+
+<nav>
+  <div class="logo">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="7" fill="#c9a84c"/><path d="M5 18L9 10.5L12.5 15.5L16 7" stroke="#0b0d14" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="7" r="2" fill="#0b0d14"/><path d="M5 21H21" stroke="#0b0d14" stroke-width="1.4" stroke-linecap="round" opacity=".35"/></svg>
+    <span class="lname">ShepherdSignals</span>
+  </div>
+  <div class="nbadge"><div class="ndot"></div>Expense Intelligence</div>
+</nav>
+
+<div class="app">
+  <div class="stepper">
+    <div class="step active" id="sb1" onclick="goTo(1)"><div class="sn" id="sn1">1</div><span class="sl">Upload</span></div>
+    <div class="step" id="sb2" onclick="goTo(2)"><div class="sn" id="sn2">2</div><span class="sl">Details</span></div>
+    <div class="step" id="sb3" onclick="goTo(3)"><div class="sn" id="sn3">3</div><span class="sl">AI Setup</span></div>
+    <div class="step" id="sb4" onclick="goTo(4)"><div class="sn" id="sn4">4</div><span class="sl">Results</span></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="panel show" id="p1">
+    <div class="ph"><h2>Upload <em>Your Invoices</em></h2><p>Upload invoices from whichever expense categories you have available. At least one file required — upload whatever you have with you.</p></div>
+    <div class="cg">
+      <div class="cc opt" id="cc-food"><div class="cico">🍽</div><div class="ctit">Food &amp; Beverage</div><div class="csub">Sysco, GFS, Restaurant Depot, local suppliers</div><span class="cbadge bo">Optional</span><div class="cstat" id="cs-food" style="color:var(--bl)">Add files below</div><div class="cfl" id="cf-food" style="display:none"></div><label class="al ab">+ Add invoices<input type="file" accept=".csv,.xlsx" multiple onchange="addF('food',this)"></label></div>
+      <div class="cc opt" id="cc-labour"><div class="cico">👥</div><div class="ctit">Labour &amp; Staffing</div><div class="csub">Payroll exports, scheduling reports, staffing invoices</div><span class="cbadge bo">Optional</span><div class="cstat" id="cs-labour" style="color:var(--bl)">Add files below</div><div class="cfl" id="cf-labour" style="display:none"></div><label class="al ab">+ Add invoices<input type="file" accept=".csv,.xlsx" multiple onchange="addF('labour',this)"></label></div>
+      <div class="cc opt" id="cc-utilities"><div class="cico">⚡</div><div class="ctit">Utilities</div><div class="csub">Electricity, gas, water, internet, phone</div><span class="cbadge bo">Optional</span><div class="cstat" id="cs-utilities" style="color:var(--bl)">Add files below</div><div class="cfl" id="cf-utilities" style="display:none"></div><label class="al ab">+ Add invoices<input type="file" accept=".csv,.xlsx" multiple onchange="addF('utilities',this)"></label></div>
+      <div class="cc opt" id="cc-vendors"><div class="cico">🚚</div><div class="ctit">Vendors &amp; Services</div><div class="csub">Linen, pest control, cleaning, CO2, waste removal</div><span class="cbadge bo">Optional</span><div class="cstat" id="cs-vendors" style="color:var(--bl)">Add files below</div><div class="cfl" id="cf-vendors" style="display:none"></div><label class="al ab">+ Add invoices<input type="file" accept=".csv,.xlsx" multiple onchange="addF('vendors',this)"></label></div>
+      <div class="cc opt" id="cc-maintenance"><div class="cico">🔧</div><div class="ctit">Maintenance &amp; Repairs</div><div class="csub">Equipment repairs, servicing, parts</div><span class="cbadge bo">Optional</span><div class="cstat" id="cs-maintenance" style="color:var(--bl)">Add files below</div><div class="cfl" id="cf-maintenance" style="display:none"></div><label class="al ab">+ Add invoices<input type="file" accept=".csv,.xlsx" multiple onchange="addF('maintenance',this)"></label></div>
+      <div class="cc opt" id="cc-other"><div class="cico">📋</div><div class="ctit">Other Expenses</div><div class="csub">Insurance, subscriptions, marketing, merchant fees</div><span class="cbadge bo">Optional</span><div class="cstat" id="cs-other" style="color:var(--bl)">Add files below</div><div class="cfl" id="cf-other" style="display:none"></div><label class="al ab">+ Add invoices<input type="file" accept=".csv,.xlsx" multiple onchange="addF('other',this)"></label></div>
+    </div>
+    <div class="card" style="border-color:rgba(90,172,142,.2)">
+      <div class="cl" style="color:var(--gn)">POS Sales Data <span style="font-size:10px;color:var(--dim);font-weight:400;text-transform:none;letter-spacing:0">(optional — enables food margin detail)</span></div>
+      <div class="cc opt" id="cc-pos" style="border-color:rgba(90,172,142,.2);text-align:left;padding:10px 12px;display:flex;align-items:center;gap:10px"><div style="font-size:18px">📊</div><div><div class="ctit" style="font-size:12px">POS Export</div><div class="cstat" id="cs-pos" style="color:var(--gn);margin-top:2px">Optional</div></div></div>
+      <div class="cfl" id="cf-pos" style="display:none"></div>
+      <label class="al" style="color:var(--gn);background:var(--gnd);border:1px solid var(--gnb)">+ Add POS CSV<input type="file" accept=".csv,.xlsx" onchange="addF('pos',this)"></label>
+    </div>
+    <div class="er" id="e1">Please upload at least one invoice file from any category before continuing.</div>
+    <div class="brow"><button class="bp" onclick="next1()">Continue to Business Details &rarr;</button></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="panel" id="p2">
+    <div class="ph"><h2>Business <em>Details</em></h2><p>The more context Claude has, the more accurate the benchmarking and the more relevant the alternatives. Fill in as much as you know.</p></div>
+
+    <!-- CORE INFO -->
+    <div class="card">
+      <div class="cl">Core Information</div>
+      <div class="fg2">
+        <div class="fg"><label>Business Name</label><input type="text" id="v-name" placeholder="e.g. Gallagher's Canyon Golf Club"></div>
+        <div class="fg"><label>City &amp; Province</label><input type="text" id="v-loc" placeholder="e.g. Kelowna, BC"></div>
+        <div class="fg"><label>Industry Type</label>
+          <select id="v-ind">
+            <option value="golf-club">Golf Club / Country Club</option>
+            <option value="restaurant">Restaurant / Bar &amp; Grill</option>
+            <option value="hotel">Hotel / Resort</option>
+            <option value="cafe">Cafe / Coffee Shop</option>
+            <option value="retail">Retail Store</option>
+            <option value="healthcare">Healthcare / Dental / Medical</option>
+            <option value="fitness">Fitness / Gym / Wellness</option>
+            <option value="office">Office / Professional Services</option>
+            <option value="manufacturing">Manufacturing / Industrial</option>
+            <option value="construction">Construction / Trades</option>
+            <option value="education">Education / Childcare</option>
+            <option value="hospitality">Hospitality / Events</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="fg"><label>Business Size</label>
+          <select id="v-size">
+            <option value="solo">Solo / Owner-operated</option>
+            <option value="micro">Micro — 2 to 10 employees</option>
+            <option value="small" selected>Small — 11 to 50 employees</option>
+            <option value="medium">Medium — 51 to 200 employees</option>
+            <option value="large">Large — 200+ employees</option>
+          </select>
+        </div>
+        <div class="fg"><label>Annual Revenue (approx)</label>
+          <select id="v-rev">
+            <option value="under250k">Under $250k</option>
+            <option value="250k-500k">$250k — $500k</option>
+            <option value="500k-1m">$500k — $1M</option>
+            <option value="1m-3m" selected>$1M — $3M</option>
+            <option value="3m-10m">$3M — $10M</option>
+            <option value="over10m">Over $10M</option>
+          </select>
+        </div>
+        <div class="fg"><label>Years in Operation</label>
+          <select id="v-age">
+            <option value="new">Less than 1 year</option>
+            <option value="1-3">1 — 3 years</option>
+            <option value="3-10" selected>3 — 10 years</option>
+            <option value="10-25">10 — 25 years</option>
+            <option value="25+">25+ years</option>
+          </select>
+        </div>
+        <div class="fg"><label>Ownership Structure</label>
+          <select id="v-own">
+            <option value="independent">Independent / Private</option>
+            <option value="franchise">Franchise</option>
+            <option value="chain">Part of a chain or group</option>
+            <option value="nonprofit">Non-profit</option>
+            <option value="public">Publicly traded</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPERATIONS -->
+    <div class="card">
+      <div class="cl">Operations</div>
+      <div class="fg2">
+        <div class="fg"><label>Operating Season</label>
+          <select id="v-season">
+            <option value="year-round" selected>Year-round</option>
+            <option value="seasonal-summer">Seasonal — Summer peak</option>
+            <option value="seasonal-winter">Seasonal — Winter peak</option>
+            <option value="seasonal-both">Seasonal — Summer &amp; Winter peaks</option>
+          </select>
+        </div>
+        <div class="fg"><label>Operating Days per Week</label>
+          <select id="v-days">
+            <option value="7">7 days</option>
+            <option value="6">6 days</option>
+            <option value="5" selected>5 days (weekdays)</option>
+            <option value="weekend">Weekends only</option>
+            <option value="variable">Variable / event-based</option>
+          </select>
+        </div>
+        <div class="fg"><label>Number of Locations</label>
+          <select id="v-locs">
+            <option value="1" selected>1 location</option>
+            <option value="2-5">2 — 5 locations</option>
+            <option value="6-20">6 — 20 locations</option>
+            <option value="20+">20+ locations</option>
+          </select>
+        </div>
+        <div class="fg"><label>Weekly Customer Volume</label>
+          <select id="v-vol">
+            <option value="under100">Under 100</option>
+            <option value="100-500" selected>100 — 500</option>
+            <option value="500-2000">500 — 2,000</option>
+            <option value="2000-10000">2,000 — 10,000</option>
+            <option value="over10000">10,000+</option>
+          </select>
+        </div>
+        <div class="fg"><label>Average Transaction Value ($)</label><input type="text" id="v-atv" placeholder="e.g. 45"></div>
+        <div class="fg"><label>Primary Revenue Type</label>
+          <select id="v-revtype">
+            <option value="service">Service-based</option>
+            <option value="product">Product / retail sales</option>
+            <option value="food-bev">Food &amp; beverage</option>
+            <option value="membership">Membership / subscription</option>
+            <option value="mixed" selected>Mixed</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROCUREMENT -->
+    <div class="card">
+      <div class="cl">Procurement &amp; Suppliers</div>
+      <div class="fg2">
+        <div class="fg"><label>Primary Food / Product Supplier</label><input type="text" id="v-sup" placeholder="e.g. Sysco Kelowna"></div>
+        <div class="fg"><label>Other Known Suppliers</label><input type="text" id="v-sup2" placeholder="e.g. GFS, Alsco, Cintas"></div>
+        <div class="fg"><label>Purchasing Method</label>
+          <select id="v-purch">
+            <option value="rep">Through a sales rep</option>
+            <option value="online">Online portal (e.g. sysco.com)</option>
+            <option value="both" selected>Both rep and online</option>
+            <option value="direct">Direct from manufacturer</option>
+          </select>
+        </div>
+        <div class="fg"><label>Contract Review Frequency</label>
+          <select id="v-contracts">
+            <option value="never">Never reviewed</option>
+            <option value="annually">Annually</option>
+            <option value="quarterly" selected>Quarterly</option>
+            <option value="monthly">Monthly</option>
+            <option value="ongoing">Ongoing / as needed</option>
+          </select>
+        </div>
+        <div class="fg"><label>Monthly Total Procurement Spend ($)</label><input type="text" id="v-spend" placeholder="e.g. 28000"></div>
+        <div class="fg"><label>Biggest Cost Pain Point</label>
+          <select id="v-pain">
+            <option value="food">Food &amp; beverage costs</option>
+            <option value="labour">Labour costs</option>
+            <option value="utilities">Utilities</option>
+            <option value="vendors">Vendor service contracts</option>
+            <option value="maintenance">Equipment &amp; maintenance</option>
+            <option value="unknown">Not sure — that's why we're here</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- TARGETS -->
+    <div class="card">
+      <div class="cl">Targets &amp; Benchmarks</div>
+      <div class="fg2">
+        <div class="fg"><label>Target Gross Margin %</label><input type="text" id="v-margin" placeholder="e.g. 65"></div>
+        <div class="fg"><label>Target Labour Cost % of Revenue</label><input type="text" id="v-labpct" placeholder="e.g. 32"></div>
+        <div class="fg"><label>Target Food Cost % of Revenue</label><input type="text" id="v-foodpct" placeholder="e.g. 30"></div>
+        <div class="fg"><label>Detection Sensitivity</label>
+          <select id="v-sens">
+            <option value="aggressive">Aggressive — flag 5%+ increases</option>
+            <option value="moderate" selected>Moderate — flag 10%+ increases</option>
+            <option value="conservative">Conservative — flag 15%+ increases</option>
+          </select>
+        </div>
+        <div class="fg" style="grid-column:1/-1"><label>Additional Context <span style="font-size:10px;color:var(--dim);text-transform:none;letter-spacing:0;font-weight:400">(optional — anything that would help Claude understand your business)</span></label><textarea id="v-notes" placeholder="e.g. We are a seasonal golf club open April to October. We have a long-standing relationship with our Sysco rep but haven't compared prices in 3 years. Our linen contract auto-renews next month." style="background:var(--s3);border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--w);font-family:var(--m);font-size:13px;width:100%;transition:border-color .15s;outline:none;resize:vertical;min-height:80px;line-height:1.6"></textarea></div>
+      </div>
+    </div>
+
+    <div class="brow"><button class="bs" onclick="goTo(1)">&larr; Back</button><button class="bp" onclick="goTo(3)">Continue to AI Setup &rarr;</button></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="panel" id="p3">
+    <div class="ph"><h2>Configure <em>AI Engine</em></h2><p>ShepherdSignals uses Claude to audit every expense, detect price creep, benchmark against competitors, and generate smart solutions with named alternatives.</p></div>
+    <div class="card">
+      <div class="cl">API Key &amp; Model</div>
+      <div class="fg2">
+        <div class="fg"><label>OpenRouter API Key</label><input type="password" id="v-key" placeholder="sk-or-v1-..." autocomplete="off"></div>
+        <div class="fg"><label>Analysis Quality</label>
+          <select id="v-model">
+            <option value="anthropic/claude-sonnet-4-5">Best Accuracy</option>
+            <option value="anthropic/claude-haiku-4-5">Medium</option>
+            <option value="google/gemini-flash-1.5">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="an">Key used only in this session — never stored.<br>Get yours at openrouter.ai → Keys → Create Key → Add $10 credit.</div>
+    </div>
+    <div class="er" id="e3">Please enter your OpenRouter API key.</div>
+    <div class="brow"><button class="bs" onclick="goTo(2)">&larr; Back</button><button class="bp" onclick="run()">Run Expense Audit &rarr;</button></div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="panel" id="p4">
+    <div class="loading" id="loading">
+      <div class="sw"><div class="sp"></div><div class="sp2"></div></div>
+      <div class="lt">Auditing <span style="color:var(--go)" id="l-name">your expenses</span></div>
+      <div class="ls2">Claude is reading every invoice across all categories</div>
+      <div class="lss">
+        <div class="lsi" id="ls0"><div class="ld"></div>Reading all invoice files</div>
+        <div class="lsi" id="ls1"><div class="ld"></div>Categorising expenses</div>
+        <div class="lsi" id="ls2"><div class="ld"></div>Building price creep timeline</div>
+        <div class="lsi" id="ls3"><div class="ld"></div>Benchmarking against market rates</div>
+        <div class="lsi" id="ls4"><div class="ld"></div>Finding cheaper alternatives</div>
+        <div class="lsi" id="ls5"><div class="ld"></div>Calculating switching savings</div>
+        <div class="lsi" id="ls6"><div class="ld"></div>Building smart solutions</div>
+        <div class="lsi" id="ls7"><div class="ld"></div>Writing full audit report</div>
+      </div>
+    </div>
+
+    <div class="report" id="report">
+      <div class="ract">
+        <button class="bsm" onclick="goTo(1)">&larr; New Audit</button>
+        <button class="bsm" onclick="printReport()">&#8595; Print Report</button>
+        <div class="rdt" id="r-date"></div>
+      </div>
+      <div class="leg">
+        <span class="legt">Data accuracy</span>
+        <div class="legi"><span class="dt dtf">&#10003; From your data</span>Calculated from invoices</div>
+        <div class="legi"><span class="dt dte">~ Estimated</span>Market knowledge</div>
+        <div class="legi"><span class="dt dtp">&#8599; Projected</span>Forward-looking</div>
+      </div>
+
+      <div class="hero">
+        <div class="ptag" id="r-tag">ShepherdSignals Expense Audit</div>
+        <div style="font-size:14px;color:var(--mid);margin-bottom:5px">Across all uploaded expense categories, we identified</div>
+        <div class="pnum" id="r-saving">—</div>
+        <div class="psub">in recoverable annual savings</div>
+        <div class="pst">
+          <div><div class="psl">Total Spend</div><div class="psv" style="color:var(--go)" id="r-spend">—</div></div>
+          <div class="pdv"></div>
+          <div><div class="psl">Categories</div><div class="psv" id="r-cats">—</div></div>
+          <div class="pdv"></div>
+          <div><div class="psl">Vendors Flagged</div><div class="psv" style="color:var(--re)" id="r-flagged">—</div></div>
+          <div class="pdv"></div>
+          <div><div class="psl">Avg Price Creep</div><div class="psv" style="color:var(--am)" id="r-creep">—</div></div>
+        </div>
+      </div>
+
+      <div class="slbl">Spend by Category <span class="dt dtf">&#10003; From your data</span></div>
+      <div class="ccg" id="r-cg"></div>
+
+      <div class="slbl">Executive Summary <span class="dt dtf">&#10003; From your data</span></div>
+      <div class="narr" id="r-narr"></div>
+
+      <div class="slbl">Price Creep Timeline <span class="dt dtf">&#10003; From your data</span></div>
+      <div class="tlw" id="r-tl"></div>
+
+      <div class="slbl">Competitive Benchmarking <span class="dt dte">~ Estimated</span></div>
+      <div class="tw"><table class="rt"><thead><tr><th>Vendor / Item</th><th>Category</th><th>Your Price</th><th>Market Rate</th><th>Overpaying</th><th>Annual Cost</th><th>Status</th></tr></thead><tbody id="r-bench"></tbody></table></div>
+
+      <div class="slbl">Smart Solutions <span class="dt dte">~ Estimated</span></div>
+      <div id="r-sol"></div>
+
+      <div class="slbl">Priority Actions <span class="dt dtp">&#8599; Projected</span></div>
+      <div class="tw"><table class="rt"><thead><tr><th>#</th><th>Action</th><th>Category</th><th>Annual Saving</th><th>Effort</th></tr></thead><tbody id="r-act"></tbody></table></div>
+
+      <div id="r-food" style="display:none">
+        <div class="slbl">Food Margin Detail <span class="dt dtf">&#10003; From your data</span></div>
+        <div class="tw"><table class="rt"><thead><tr><th>Menu Item</th><th>Units Sold</th><th>Food Cost %</th><th>Target %</th><th>Margin Lost</th><th>Fix Price</th><th>Status</th></tr></thead><tbody id="r-fi"></tbody></table></div>
+        <div class="tcol">
+          <div class="card"><div class="slbl" style="margin-bottom:8px">Menu Engineering <span class="dt dtf">&#10003;</span></div><div id="r-eng"></div></div>
+          <div class="card"><div class="slbl" style="margin-bottom:8px">Day &amp; Daypart <span class="dt dte">~</span></div><div id="r-dp"></div></div>
+        </div>
+      </div>
+
+      <div class="banner">
+        <div class="banlbl">Total Recoverable Annual Savings <span class="dt dtp">&#8599; Projected</span></div>
+        <div class="banamt" id="r-ba">$0</div>
+        <div class="bansub">across <span id="r-bc">all categories</span> — available without changing how you operate</div>
+      </div>
+      <div class="er" id="e4" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="cw" id="cw">
+  <div class="cwn" id="cwn">
+    <div class="chd">
+      <div class="ci">
+        <div class="cav"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 8.5L4.5 4.5L7 7.5L10 3" stroke="#c9a84c" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="3" r="1" fill="#c9a84c"/></svg></div>
+        <div><div class="cnm">ShepherdSignals AI</div><div class="cst">Ask about your audit</div></div>
+      </div>
+      <button class="cx" onclick="toggleChat()">&#10005;</button>
+    </div>
+    <div class="cms" id="cms"><div class="msg ai">Hey — I have read your full expense audit. Ask me anything about your costs, flagged vendors, or savings opportunities.</div></div>
+    <div class="csg" id="csg">
+      <div class="csug" onclick="askSug(this)">Where am I overpaying most?</div>
+      <div class="csug" onclick="askSug(this)">Which vendor to switch first?</div>
+      <div class="csug" onclick="askSug(this)">Biggest price creep?</div>
+      <div class="csug" onclick="askSug(this)">Top 3 actions this week?</div>
+    </div>
+    <div class="cir">
+      <input class="cin" id="cin" placeholder="Ask about your audit..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="csnd" onclick="sendChat()"><svg viewBox="0 0 12 12" fill="none" width="11" height="11"><path d="M1 6h10M6 1l5 5-5 5" stroke="#0b0d14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </div>
+  <button class="ctg" onclick="toggleChat()">
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none"><path d="M2.5 12.5L6.5 6.5L10 11L13.5 4.5" stroke="#0b0d14" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="4.5" r="1.5" fill="#0b0d14"/></svg>
+    <div class="cpul" id="cpul"></div>
+  </button>
+</div>
+
+<script>
+var F={food:[],labour:[],utilities:[],vendors:[],maintenance:[],other:[],pos:[]};
+var RC=null,CH=[],CO=false,LT=null;
+var CM={food:{label:'Food & Beverage',icon:'🍽',cls:'food',color:'var(--go)'},labour:{label:'Labour',icon:'👥',cls:'labour',color:'var(--bl)'},utilities:{label:'Utilities',icon:'⚡',cls:'utilities',color:'var(--gn)'},vendors:{label:'Vendors & Services',icon:'🚚',cls:'vendors',color:'var(--am)'},maintenance:{label:'Maintenance',icon:'🔧',cls:'maintenance',color:'var(--re)'},other:{label:'Other Expenses',icon:'📋',cls:'other',color:'var(--pu)'}};
+
+function goTo(n){
+  for(var i=1;i<=4;i++){
+    var p=document.getElementById('p'+i);if(p)p.classList.toggle('show',i===n);
+    var sb=document.getElementById('sb'+i),sn=document.getElementById('sn'+i);if(!sb||!sn)continue;
+    sb.classList.remove('active','done');if(i===n)sb.classList.add('active');
+    if(i<n){sb.classList.add('done');sn.textContent='\u2713';}else sn.textContent=i;
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function next1(){
+  var hasAny = Object.keys(F).some(function(k){ return F[k].length > 0; });
+  if(!hasAny){showE('e1');return;}
+  hideE('e1');goTo(2);
+}
+function showE(id){var el=document.getElementById(id);if(el)el.classList.add('show');}
+function hideE(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+function rf(f,cb){var r=new FileReader();r.onload=function(e){cb(e.target.result);};r.readAsText(f);}
+function addF(cat,input){
+  Array.from(input.files).forEach(function(f){
+    rf(f,function(txt){F[cat].push({name:f.name,data:txt});renderCat(cat);});
+  });
+}
+function renderCat(cat){
+  var arr=F[cat],sc=document.getElementById('cs-'+cat),fc=document.getElementById('cf-'+cat),card=document.getElementById('cc-'+cat);
+  if(!sc||!fc||!card)return;
+  card.classList.add('done');
+  sc.style.color=cat==='pos'?'var(--gn)':'var(--bl)';
+  sc.textContent='\u2713 '+arr.length+' file'+(arr.length>1?'s':'')+' loaded';
+  fc.style.display='block';
+  fc.innerHTML=arr.map(function(f,i){return'<div class="cfr"><span>\u2713 '+f.name+'</span><button onclick="delF(\''+cat+'\','+i+')">Remove</button></div>';}).join('');
+}
+function delF(cat,i){F[cat].splice(i,1);if(!F[cat].length){document.getElementById('cc-'+cat).classList.remove('done');document.getElementById('cs-'+cat).textContent='Add files below';document.getElementById('cf-'+cat).style.display='none';}else renderCat(cat);}
+function mergeAll(){
+  var out='';
+  Object.keys(CM).forEach(function(cat){
+    if(F[cat].length){out+='=== '+CM[cat].label.toUpperCase()+' ===\n';F[cat].forEach(function(f){out+=f.data+'\n';});out+='\n';}
+  });
+  if(F.pos.length){out+='=== POS SALES DATA ===\n';F.pos.forEach(function(f){out+=f.data+'\n'});out+='\n';}
+  return out;
+}
+function cfg(){
+  return{name:document.getElementById('v-name').value||'The Business',loc:document.getElementById('v-loc').value||'',ind:document.getElementById('v-ind').value,rev:document.getElementById('v-rev').value,sup:document.getElementById('v-sup').value||'Sysco',sens:document.getElementById('v-sens').value,key:document.getElementById('v-key').value.trim(),model:document.getElementById('v-model').value,hasPOS:F.pos.length>0,cats:Object.keys(CM).filter(function(k){return F[k].length>0;})};
+}
+function startLoad(){
+  var ss=document.querySelectorAll('.lsi');ss.forEach(function(s){s.classList.remove('cur','fin');});
+  var cur=0;ss[0].classList.add('cur');
+  LT=setInterval(function(){if(cur<ss.length-1){ss[cur].classList.remove('cur');ss[cur].classList.add('fin');cur++;ss[cur].classList.add('cur');}},2000);
+}
+function stopLoad(){clearInterval(LT);document.querySelectorAll('.lsi').forEach(function(s){s.classList.remove('cur');s.classList.add('fin');});}
+function buildPrompt(c){
+  var fd=c.hasPOS?'POS data is provided. Also include "foodDetail":{"items":[{"name":"...","category":"...","unitsSold":0,"actualCostPct":0,"targetCostPct":28,"marginLost":0,"suggestedPrice":0,"status":"critical"}],"menuEngineering":[{"name":"...","category":"...","unitsSold":0,"marginPct":0,"quadrant":"star","action":"..."}],"daypartAnalysis":{"bestDay":"Friday","worstDay":"Sunday","bestMarginPct":71,"worstMarginPct":48,"recommendation":"..."}}':'No POS data uploaded — omit foodDetail.';
+  var ctx = [
+    'BUSINESS: '+c.name+(c.loc?', '+c.loc:''),
+    'INDUSTRY: '+c.ind,
+    'BUSINESS SIZE: '+c.size,
+    'ANNUAL REVENUE: '+c.rev,
+    'YEARS IN OPERATION: '+c.age,
+    'OWNERSHIP: '+c.own,
+    'OPERATING SEASON: '+c.season,
+    'OPERATING DAYS: '+c.days+' per week',
+    'NUMBER OF LOCATIONS: '+c.locations,
+    'WEEKLY CUSTOMER VOLUME: '+c.volume,
+    'AVG TRANSACTION VALUE: '+(c.atv?'$'+c.atv:'unknown'),
+    'PRIMARY REVENUE TYPE: '+c.revtype,
+    'PRIMARY SUPPLIER: '+c.sup,
+    'OTHER KNOWN SUPPLIERS: '+(c.sup2||'not specified'),
+    'PURCHASING METHOD: '+c.purch,
+    'CONTRACT REVIEW FREQUENCY: '+c.contracts,
+    'MONTHLY PROCUREMENT SPEND: '+(c.spend?'$'+c.spend:'not specified'),
+    'BIGGEST COST PAIN POINT: '+c.pain,
+    'TARGET GROSS MARGIN: '+(c.margin?c.margin+'%':'not specified'),
+    'TARGET LABOUR COST %: '+(c.labpct?c.labpct+'%':'not specified'),
+    'TARGET FOOD COST %: '+(c.foodpct?c.foodpct+'%':'not specified'),
+    'DETECTION SENSITIVITY: '+c.sens,
+    'CATEGORIES UPLOADED: '+c.cats.join(', '),
+    c.notes?'ADDITIONAL CONTEXT: '+c.notes:''
+  ].filter(Boolean).join('\n');
+  return['You are ShepherdSignals, a business expense intelligence engine. Audit ALL uploaded invoice data. Detect price creep across every vendor. Benchmark against real market competitors. Build a smart solutions list with SPECIFIC named vendors and actionable contact information. Use all business context provided to make benchmarks and recommendations as specific and relevant as possible.',
+    '',ctx,'','ALL INVOICE AND SALES DATA:',mergeAll(),
+    '','Respond ONLY with raw JSON. No markdown. Start with { end with }.','',
+    '{"summary":{"totalSpend":280000,"totalSaving":42000,"catsAnalysed":4,"vendorsFlagged":8,"avgCreepPct":14.2},"narrative":"4-5 paragraph executive briefing using ACTUAL vendor names, ACTUAL amounts, and ACTUAL dates from the uploaded invoices. Professional tone for a GM meeting.","categoryBreakdown":[{"category":"food","label":"Food & Beverage","totalSpend":89000,"changePct":12.4,"saving":14000,"status":"critical"},{"category":"vendors","label":"Vendors & Services","totalSpend":42000,"changePct":18.2,"saving":18000,"status":"critical"}],"priceCreepTimeline":[{"vendor":"Sysco Kelowna","category":"food","item":"Romaine Lettuce","startPrice":1.85,"endPrice":2.90,"changePct":56.8,"startDate":"Oct 2024","endDate":"Mar 2025","annualImpact":4200}],"competitiveBenchmark":[{"vendor":"Sysco Kelowna","item":"Romaine Lettuce","category":"Food","yourPrice":2.90,"yourUnit":"per head","marketRate":2.10,"marketUnit":"per head","gapPct":38,"annualCost":4200}],"smartSolutions":[{"currentVendor":"Sysco Kelowna","category":"Food & Beverage","items":["Romaine Lettuce","Chicken Breast"],"maxSaving":12000,"alternatives":[{"name":"Gordon Food Service","saving":8400,"action":"Call 1-800-968-5686 for a quote","note":"6-10% cheaper on produce and proteins. Has a Kelowna rep."}]}],"priorityActions":[{"rank":1,"action":"Request competing quote from GFS for top 10 food items","category":"Food & Beverage","annualSaving":8400,"effort":"Low"}]}',
+    '','Rules:',
+    '- Analyse ALL uploaded categories — not just food',
+    '- priceCreepTimeline: 6-8 most significant movements across all categories, sorted by annualImpact descending',
+    '- competitiveBenchmark: ALL vendors above market rate across all categories with specific comparable market rates',
+    '- smartSolutions: 2-3 SPECIFIC real named alternatives per vendor with actual phone numbers or websites for '+c.loc,
+    '- priorityActions: ranked by annualSaving descending, specific action wording, realistic effort level Low/Medium/High',
+    '- Use ACTUAL vendor names, dates, and amounts from the uploaded invoice data',
+    '- Analyse the FULL date range of uploaded data',
+    fd].join('\n');
+}
+function run(){
+  var c=cfg();if(!c.key){showE('e3');return;}hideE('e3');
+  goTo(4);document.getElementById('l-name').textContent=c.name;
+  document.getElementById('loading').classList.add('show');document.getElementById('report').classList.remove('show');
+  startLoad();
+  fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key,'HTTP-Referer':'https://shepherdsignals.com','X-Title':'ShepherdSignals'},body:JSON.stringify({model:c.model,max_tokens:8000,temperature:0,messages:[{role:'user',content:buildPrompt(c)}]})})
+  .then(function(res){if(!res.ok)return res.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'API error '+res.status);});return res.json();})
+  .then(function(data){
+    var raw=data.choices?data.choices[0].message.content:'';
+    var rpt=null;
+    var tries=[function(){return JSON.parse(raw.replace(/```json|```/g,'').trim());},function(){var s=raw.indexOf('{'),e=raw.lastIndexOf('}');if(s<0||e<0)throw new Error('no braces');return JSON.parse(raw.slice(s,e+1));},function(){var cl=raw.replace(/```json|```/g,'').trim();var s=cl.indexOf('{'),e=cl.lastIndexOf('}');return JSON.parse(cl.slice(s,e+1).replace(/,(\s*[}\]])/g,'$1'));}];
+    for(var i=0;i<tries.length;i++){try{rpt=tries[i]();break;}catch(ex){continue;}}
+    if(!rpt)throw new Error('Could not parse AI response. Try again or switch to Best Accuracy.');
+    stopLoad();render(rpt,c);
+  })
+  .catch(function(err){stopLoad();document.getElementById('loading').classList.remove('show');document.getElementById('report').classList.add('show');var el=document.getElementById('e4');el.textContent='Error: '+(err.message||'Analysis failed.');el.classList.add('show');});
+}
+function fmt(n){return'$'+Number(n||0).toLocaleString('en-CA',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmtP(n){return(n>0?'+':'')+Number(n||0).toFixed(1)+'%';}
+function st(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+function render(rpt,c){
+  document.getElementById('loading').classList.remove('show');document.getElementById('report').classList.add('show');
+  var s=rpt.summary||{};
+  var ds=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});
+  st('r-date','Generated '+ds);document.getElementById('phdr-m').textContent=c.name+(c.loc?' \u00b7 '+c.loc:'')+' \u00b7 '+ds;
+  st('r-tag','ShepherdSignals Expense Audit \u00b7 '+c.name+(c.loc?' \u00b7 '+c.loc:''));
+  st('r-saving',fmt(s.totalSaving));st('r-spend',fmt(s.totalSpend));st('r-cats',s.catsAnalysed||(rpt.categoryBreakdown||[]).length);st('r-flagged',s.vendorsFlagged||0);st('r-creep',fmtP(s.avgCreepPct));
+  st('r-narr',rpt.narrative||'');st('r-ba',fmt(s.totalSaving));st('r-bc',(rpt.categoryBreakdown||[]).length+' expense categories');
+  // Category cards
+  document.getElementById('r-cg').innerHTML=(rpt.categoryBreakdown||[]).map(function(cat){
+    var m=CM[cat.category]||{label:cat.label,icon:'📋',cls:'other',color:'var(--pu)'};
+    var cc=(cat.changePct||0)>0?'var(--re)':'var(--gn)';
+    return'<div class="ccs '+m.cls+'"><div class="ccsi">'+m.icon+'</div><div class="ccsc">'+cat.label+'</div><div class="ccss" style="color:'+m.color+'">'+fmt(cat.totalSpend)+'</div><div class="ccsd" style="color:'+cc+'">'+fmtP(cat.changePct)+' vs prior</div><div class="ccsr" style="color:var(--go)">'+fmt(cat.saving)+' recoverable</div></div>';
+  }).join('');
+  // Timeline
+  document.getElementById('r-tl').innerHTML=(rpt.priceCreepTimeline||[]).length?(rpt.priceCreepTimeline||[]).map(function(it){
+    var pct=it.changePct||0,bc=pct>20?'var(--re)':pct>10?'var(--am)':'var(--go)',bw=Math.min(100,Math.abs(pct)*1.5);
+    return'<div class="tli"><div class="tlh"><div><span class="inm">'+it.vendor+'</span><span style="font-size:11px;color:var(--dim);font-family:var(--m)"> \u00b7 '+it.item+'</span></div><div style="display:flex;align-items:center;gap:10px"><span style="font-size:11px;color:var(--dim);font-family:var(--m)">'+fmt(it.startPrice)+' \u2192 '+fmt(it.endPrice)+'</span><span style="font-size:12px;font-weight:700;font-family:var(--m);color:'+bc+'">+'+pct.toFixed(1)+'%</span><span style="font-size:11px;color:var(--re);font-family:var(--m)">'+fmt(it.annualImpact)+'/yr</span></div></div><div class="tlbar"><div class="tlf" style="width:'+bw+'%;background:'+bc+'"></div></div><div class="tldts"><span class="tldt">'+(it.startDate||'')+'</span><span style="font-size:10px;color:var(--dim)">'+(it.category||'')+'</span><span class="tldt">'+(it.endDate||'')+'</span></div></div>';
+  }).join(''):'<div style="padding:20px;text-align:center;color:var(--dim)">No significant price creep detected</div>';
+  // Benchmark
+  document.getElementById('r-bench').innerHTML=(rpt.competitiveBenchmark||[]).length?(rpt.competitiveBenchmark||[]).map(function(b){
+    var g=b.gapPct||0,gc=g>20?'color:var(--re)':g>10?'color:var(--am)':'color:var(--go)';
+    var pill=g>20?'<span class="pill pr">Overpaying</span>':g>10?'<span class="pill pa">Watch</span>':'<span class="pill pg">OK</span>';
+    return'<tr><td><div class="inm">'+b.vendor+'</div><div class="ica">'+b.item+'</div></td><td style="color:var(--mid)">'+b.category+'</td><td style="color:var(--re);font-weight:600">'+fmt(b.yourPrice)+'<span style="font-size:10px;color:var(--dim)"> '+(b.yourUnit||'')+'</span></td><td style="color:var(--gn);font-weight:600">'+fmt(b.marketRate)+'<span style="font-size:10px;color:var(--dim)"> '+(b.marketUnit||'')+'</span></td><td style="font-weight:700;'+gc+'">+'+g+'%</td><td style="color:var(--re);font-weight:600">'+fmt(b.annualCost)+'/yr</td><td>'+pill+'</td></tr>';
+  }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:20px">No vendors above market rate found</td></tr>';
+  // Smart solutions
+  document.getElementById('r-sol').innerHTML=(rpt.smartSolutions||[]).map(function(sol){
+    var alts=(sol.alternatives||[]).map(function(a){return'<div class="alt"><div class="alt-h"><div class="alt-n">'+a.name+'</div><div class="alt-s">Save '+fmt(a.saving)+'/yr</div></div><div class="alt-d">'+a.note+'</div><div class="alt-a">&#128222; '+a.action+'</div></div>';}).join('');
+    return'<div class="sol"><div class="sol-hdr"><div><div class="sol-v">'+sol.currentVendor+'</div><div class="sol-c">'+sol.category+' \u00b7 '+(sol.items||[]).join(', ')+'</div></div><div class="sol-s">Up to '+fmt(sol.maxSaving)+'/yr available</div></div>'+alts+'</div>';
+  }).join('');
+  // Priority actions
+  document.getElementById('r-act').innerHTML=(rpt.priorityActions||[]).length?(rpt.priorityActions||[]).map(function(a){
+    var rc=a.rank===1?'color:var(--re)':a.rank===2?'color:var(--am)':'color:var(--go)';
+    var ep=(a.effort||'').toLowerCase(),ecls=ep.indexOf('low')>=0?'pgn':ep.indexOf('high')>=0?'pr':'pa';
+    return'<tr><td style="font-family:var(--se);font-size:20px;font-weight:700;'+rc+'">'+a.rank+'</td><td><div class="inm">'+(a.action||'')+'</div></td><td style="color:var(--mid)">'+(a.category||'')+'</td><td style="color:var(--go);font-weight:600">'+fmt(a.annualSaving)+'/yr</td><td><span class="pill '+ecls+'">'+(a.effort||'')+'</span></td></tr>';
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">No actions</td></tr>';
+  // Food detail
+  if(c.hasPOS&&rpt.foodDetail){
+    document.getElementById('r-food').style.display='block';
+    var fi=rpt.foodDetail.items||[];
+    document.getElementById('r-fi').innerHTML=fi.length?fi.sort(function(a,b){return(b.marginLost||0)-(a.marginLost||0);}).map(function(it){
+      var pill=it.status==='critical'?'<span class="pill pr">Critical</span>':it.status==='warning'?'<span class="pill pa">Watch</span>':'<span class="pill pg">OK</span>';
+      var cc=it.actualCostPct>it.targetCostPct?'color:var(--re)':'color:var(--go)';
+      return'<tr><td><div class="inm">'+it.name+'</div><div class="ica">'+it.category+'</div></td><td>'+(it.unitsSold||0).toLocaleString()+'</td><td style="'+cc+'">'+it.actualCostPct+'%</td><td>'+it.targetCostPct+'%</td><td style="color:var(--re);font-weight:600">'+fmt(it.marginLost)+'</td><td style="color:var(--go);font-weight:600">'+(it.suggestedPrice?'$'+Number(it.suggestedPrice).toFixed(2):'\u2014')+'</td><td>'+pill+'</td></tr>';
+    }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:20px">No food items</td></tr>';
+    var eng=rpt.foodDetail.menuEngineering||[];
+    var qm={star:'pg',plowhorse:'pa',puzzle:'pb',dog:'pr'},ql={star:'Star',plowhorse:'Plowhorse',puzzle:'Puzzle',dog:'Dog'};
+    document.getElementById('r-eng').innerHTML=eng.map(function(e){return'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:12px"><div><span style="font-weight:600;font-family:var(--f)">'+e.name+'</span><div style="font-size:10px;color:var(--dim)">'+e.action+'</div></div><span class="pill '+(qm[e.quadrant]||'pa')+'">'+(ql[e.quadrant]||e.quadrant)+'</span></div>';}).join('');
+    var dp=rpt.foodDetail.daypartAnalysis||{};
+    document.getElementById('r-dp').innerHTML='<div style="font-size:12px;color:var(--mid);font-family:var(--m);line-height:1.65;margin-bottom:10px">'+(dp.recommendation||'')+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div style="background:var(--s3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--go);margin-bottom:2px;font-weight:600">Best</div><div style="font-size:14px;font-weight:700;color:var(--go)">'+(dp.bestDay||'\u2014')+'</div><div style="font-size:10px;font-family:var(--m);color:var(--mid)">'+(dp.bestMarginPct||0)+'%</div></div><div style="background:var(--s3);border-radius:6px;padding:8px;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--re);margin-bottom:2px;font-weight:600">Worst</div><div style="font-size:14px;font-weight:700;color:var(--re)">'+(dp.worstDay||'\u2014')+'</div><div style="font-size:10px;font-family:var(--m);color:var(--mid)">'+(dp.worstMarginPct||0)+'%</div></div></div>';
+  }
+  RC=rpt;document.getElementById('cw').style.display='block';
+}
+function printReport(){
+  var p=document.getElementById('p4'),r=document.getElementById('report'),l=document.getElementById('loading');
+  if(p){p.style.display='block';p.classList.add('show');}
+  if(r){r.style.display='block';r.classList.add('show');}
+  if(l)l.style.display='none';
+  var tg=document.getElementById('r-tag'),hd=document.getElementById('phdr-m');
+  if(hd&&tg)hd.textContent=tg.textContent;
+  setTimeout(function(){window.print();},200);
+}
+function toggleChat(){CO=!CO;document.getElementById('cwn').classList.toggle('open',CO);document.getElementById('cpul').style.display=CO?'none':'block';if(CO)document.getElementById('cin').focus();}
+function askSug(el){document.getElementById('cin').value=el.textContent;document.getElementById('csg').style.display='none';sendChat();}
+function addMsg(t,type){var m=document.getElementById('cms'),d=document.createElement('div');d.className='msg '+type;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight;}
+function showTyping(){var m=document.getElementById('cms'),d=document.createElement('div');d.className='msg ai';d.id='typing';d.innerHTML='<div class="typ"><span></span><span></span><span></span></div>';m.appendChild(d);m.scrollTop=m.scrollHeight;}
+function rmTyping(){var t=document.getElementById('typing');if(t)t.parentNode.removeChild(t);}
+function sendChat(){
+  var inp=document.getElementById('cin'),txt=inp.value.trim();if(!txt)return;
+  if(!RC){addMsg('Please run an audit first.','ai');return;}
+  var key=document.getElementById('v-key').value.trim(),model=document.getElementById('v-model').value;
+  if(!key){addMsg('Please enter your API key in Step 3.','ai');return;}
+  inp.value='';addMsg(txt,'usr');showTyping();CH.push({role:'user',content:txt});
+  fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':'https://shepherdsignals.com','X-Title':'ShepherdSignals Chat'},body:JSON.stringify({model:model,max_tokens:400,temperature:0.3,messages:[{role:'system',content:'You are ShepherdSignals AI. You audited a business and produced this report. Answer concisely using specific numbers. Under 4 sentences.\n\nReport:\n'+JSON.stringify(RC)}].concat(CH)})})
+  .then(function(r){return r.json();})
+  .then(function(d){var reply=d.choices?d.choices[0].message.content:'Sorry, could not get a response.';rmTyping();addMsg(reply,'ai');CH.push({role:'assistant',content:reply});if(CH.length>20)CH=CH.slice(-20);})
+  .catch(function(){rmTyping();addMsg('Connection error. Try again.','ai');});
+}
+</script>
+</body>
+</html>
